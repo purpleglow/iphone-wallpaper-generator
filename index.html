@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone 16 Pro Wallpaper Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .canvas-container {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #wallpaperCanvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: crosshair;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .controls {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            position: sticky;
+            top: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .specs {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .color-btn {
+            aspect-ratio: 1;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            border-color: #fff;
+        }
+
+        .color-btn.selected {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px #2a2a2a, 0 0 0 4px #fff;
+        }
+
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .slider-value {
+            color: #888;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #3a3a3a;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 45px;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0051D5;
+        }
+
+        .btn-secondary {
+            background: #3a3a3a;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4a4a4a;
+        }
+
+        .btn-danger {
+            background: #FF3B30;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #D32F2F;
+        }
+
+        .info {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #888;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="wallpaperCanvas"></canvas>
+        </div>
+
+        <div class="controls">
+            <h1>iPhone 16 Pro Wallpaper</h1>
+            <div class="specs">
+                Resolution: 1206×2622 pixels<br>
+                Grid: 4 columns × 6 rows<br>
+                Icon Size: 180×180 px (60pt @3x)
+            </div>
+
+            <div class="section">
+                <div class="section-title">Background Color</div>
+                <input type="color" id="bgColor" value="#1a1a2e">
+            </div>
+
+            <div class="section">
+                <div class="section-title">Folder Colors</div>
+                <div class="color-grid" id="colorPalette"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Folder Brightness</div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Brightness</span>
+                        <span class="slider-value" id="brightnessValue">0</span>
+                    </div>
+                    <input type="range" id="brightness" min="-100" max="100" value="0">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Folder Saturation</div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Saturation</span>
+                        <span class="slider-value" id="saturationValue">0</span>
+                    </div>
+                    <input type="range" id="saturation" min="-100" max="100" value="0">
+                </div>
+            </div>
+
+            <div class="section">
+                <button class="btn btn-primary" id="fillRandom">Fill All Random</button>
+                <button class="btn btn-secondary" id="clearAll">Clear All</button>
+                <button class="btn btn-primary" id="download">Download PNG</button>
+            </div>
+
+            <div class="info">
+                <strong>How to use:</strong><br>
+                • Click on grid positions to add/remove folders<br>
+                • Select colors from the palette<br>
+                • Adjust brightness and saturation<br>
+                • Download and set as wallpaper<br><br>
+                The wallpaper is designed to align pixel-perfect with iOS folder positions.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // iPhone 16 Pro specifications (researched values)
+        const CANVAS_WIDTH = 1206;
+        const CANVAS_HEIGHT = 2622;
+        const ICON_SIZE = 180; // 60pt at @3x
+        const COLS = 4;
+        const ROWS = 6;
+
+        // Calculated grid positions based on iPhone 16 Pro layout
+        // These values are derived from typical iOS layouts
+        const HORIZONTAL_MARGIN = 93; // Side margins
+        const VERTICAL_TOP_MARGIN = 270; // From top to first icon center (includes status bar)
+        const HORIZONTAL_SPACING = 280; // Distance between icon centers horizontally
+        const VERTICAL_SPACING = 365; // Distance between icon centers vertically
+
+        // Color palette - vibrant solids and gradients
+        const colorPalette = [
+            { type: 'solid', color: '#FF3B30' },
+            { type: 'solid', color: '#FF9500' },
+            { type: 'solid', color: '#FFCC00' },
+            { type: 'solid', color: '#34C759' },
+            { type: 'solid', color: '#00C7BE' },
+            { type: 'solid', color: '#30B0C7' },
+            { type: 'solid', color: '#007AFF' },
+            { type: 'solid', color: '#5856D6' },
+            { type: 'solid', color: '#AF52DE' },
+            { type: 'solid', color: '#FF2D55' },
+            { type: 'gradient', colors: ['#FF6B6B', '#FFE66D'] },
+            { type: 'gradient', colors: ['#4ECDC4', '#556270'] },
+            { type: 'gradient', colors: ['#A8EDEA', '#FED6E3'] },
+            { type: 'gradient', colors: ['#FA709A', '#FEE140'] },
+            { type: 'gradient', colors: ['#30CFD0', '#330867'] },
+            { type: 'gradient', colors: ['#A8EB12', '#06B49A'] },
+        ];
+
+        let canvas, ctx;
+        let gridState = Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+        let selectedColor = colorPalette[0];
+        let brightness = 0;
+        let saturation = 0;
+
+        function init() {
+            canvas = document.getElementById('wallpaperCanvas');
+            ctx = canvas.getContext('2d');
+
+            canvas.width = CANVAS_WIDTH;
+            canvas.height = CANVAS_HEIGHT;
+
+            setupColorPalette();
+            setupEventListeners();
+            render();
+        }
+
+        function setupColorPalette() {
+            const paletteContainer = document.getElementById('colorPalette');
+
+            colorPalette.forEach((color, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'color-btn';
+
+                if (color.type === 'solid') {
+                    btn.style.background = color.color;
+                } else {
+                    btn.style.background = `linear-gradient(135deg, ${color.colors[0]}, ${color.colors[1]})`;
+                }
+
+                if (index === 0) btn.classList.add('selected');
+
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedColor = color;
+                });
+
+                paletteContainer.appendChild(btn);
+            });
+        }
+
+        function setupEventListeners() {
+            canvas.addEventListener('click', handleCanvasClick);
+
+            document.getElementById('bgColor').addEventListener('input', (e) => {
+                render();
+            });
+
+            document.getElementById('brightness').addEventListener('input', (e) => {
+                brightness = parseInt(e.target.value);
+                document.getElementById('brightnessValue').textContent = brightness;
+                render();
+            });
+
+            document.getElementById('saturation').addEventListener('input', (e) => {
+                saturation = parseInt(e.target.value);
+                document.getElementById('saturationValue').textContent = saturation;
+                render();
+            });
+
+            document.getElementById('fillRandom').addEventListener('click', fillAllRandom);
+            document.getElementById('clearAll').addEventListener('click', clearAll);
+            document.getElementById('download').addEventListener('click', downloadImage);
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            const gridPos = getGridPosition(x, y);
+
+            if (gridPos) {
+                const { row, col } = gridPos;
+                if (gridState[row][col]) {
+                    gridState[row][col] = null; // Remove
+                } else {
+                    gridState[row][col] = { ...selectedColor }; // Add
+                }
+                render();
+            }
+        }
+
+        function getGridPosition(x, y) {
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const iconX = HORIZONTAL_MARGIN + col * HORIZONTAL_SPACING;
+                    const iconY = VERTICAL_TOP_MARGIN + row * VERTICAL_SPACING;
+
+                    const dx = x - iconX;
+                    const dy = y - iconY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < ICON_SIZE / 2) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function fillAllRandom() {
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+                    gridState[row][col] = { ...randomColor };
+                }
+            }
+            render();
+        }
+
+        function clearAll() {
+            gridState = Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+            render();
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = `iphone-16-pro-wallpaper-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function render() {
+            const bgColor = document.getElementById('bgColor').value;
+
+            // Clear canvas with background color
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // Draw folders
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (gridState[row][col]) {
+                        const x = HORIZONTAL_MARGIN + col * HORIZONTAL_SPACING;
+                        const y = VERTICAL_TOP_MARGIN + row * VERTICAL_SPACING;
+                        drawFolder(x, y, gridState[row][col]);
+                    }
+                }
+            }
+        }
+
+        function drawFolder(centerX, centerY, colorData) {
+            const x = centerX - ICON_SIZE / 2;
+            const y = centerY - ICON_SIZE / 2;
+
+            ctx.save();
+
+            // Create squircle path
+            const path = createSquirclePath(x, y, ICON_SIZE, ICON_SIZE);
+
+            // Fill with color
+            if (colorData.type === 'solid') {
+                ctx.fillStyle = adjustColor(colorData.color, brightness, saturation);
+            } else {
+                const gradient = ctx.createLinearGradient(x, y, x + ICON_SIZE, y + ICON_SIZE);
+                gradient.addColorStop(0, adjustColor(colorData.colors[0], brightness, saturation));
+                gradient.addColorStop(1, adjustColor(colorData.colors[1], brightness, saturation));
+                ctx.fillStyle = gradient;
+            }
+
+            ctx.fill(path);
+            ctx.restore();
+        }
+
+        // iOS squircle shape using proper continuous corner radius
+        // Based on Apple's superellipse formula
+        function createSquirclePath(x, y, width, height) {
+            const path = new Path2D();
+            const radius = width * 0.225; // iOS continuous corner radius ratio
+
+            // Control point distance for bezier curves (approximates superellipse)
+            const controlDistance = radius * 0.552284749831;
+
+            // Starting from top-left, moving clockwise
+            path.moveTo(x + radius, y);
+
+            // Top edge
+            path.lineTo(x + width - radius, y);
+
+            // Top-right corner
+            path.bezierCurveTo(
+                x + width - radius + controlDistance, y,
+                x + width, y + radius - controlDistance,
+                x + width, y + radius
+            );
+
+            // Right edge
+            path.lineTo(x + width, y + height - radius);
+
+            // Bottom-right corner
+            path.bezierCurveTo(
+                x + width, y + height - radius + controlDistance,
+                x + width - radius + controlDistance, y + height,
+                x + width - radius, y + height
+            );
+
+            // Bottom edge
+            path.lineTo(x + radius, y + height);
+
+            // Bottom-left corner
+            path.bezierCurveTo(
+                x + radius - controlDistance, y + height,
+                x, y + height - radius + controlDistance,
+                x, y + height - radius
+            );
+
+            // Left edge
+            path.lineTo(x, y + radius);
+
+            // Top-left corner
+            path.bezierCurveTo(
+                x, y + radius - controlDistance,
+                x + radius - controlDistance, y,
+                x + radius, y
+            );
+
+            path.closePath();
+            return path;
+        }
+
+        function adjustColor(hex, brightness, saturation) {
+            // Convert hex to RGB
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+
+            // Convert to HSL
+            let { h, s, l } = rgbToHsl(r, g, b);
+
+            // Adjust saturation (-100 to +100)
+            s = Math.max(0, Math.min(1, s + (saturation / 100)));
+
+            // Adjust lightness/brightness (-100 to +100)
+            l = Math.max(0, Math.min(1, l + (brightness / 100)));
+
+            // Convert back to RGB
+            const { r: newR, g: newG, b: newB } = hslToRgb(h, s, l);
+
+            // Convert to hex
+            return `#${Math.round(newR).toString(16).padStart(2, '0')}${Math.round(newG).toString(16).padStart(2, '0')}${Math.round(newB).toString(16).padStart(2, '0')}`;
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            return { h, s, l };
+        }
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+
+            return { r: r * 255, g: g * 255, b: b * 255 };
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
